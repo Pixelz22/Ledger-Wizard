@@ -1,0 +1,96 @@
+struct LedgerEntry:
+    Used for bundling together the data for each entry in the ledger
+    Fields:
+    - string date
+    - int due
+    - int paid
+    - int received
+    - string notes
+
+struct LedgerWeek:
+    Used to associate a date with each week
+    - string date
+    - List<LedgerEntry> entries
+
+Each Ledger page is a list of LedgerWeek objects. These are loaded into a program through externally saved files.
+Each client has a different file, files are loaded based on client names.
+
+NOTE: weeks will almost never be interacted with directly by the user.
+Mostly they are for organization in the program as well as computing overdue fees.
+
+There will be a lot of functions for interacting with these lists, including but not limited to:
+- manually adding a new ledger entry
+- creating a ledger entry from session data
+- saving ledger pages to a file
+- exporting ledger pages into a spreadsheet
+- removing ledger entries based on index
+- computing the total due, paid, and received at the end of each week
+- listing all weeks from a client's ledger page
+- listing all entries from a week in a ledger page
+- Initializing a new week (automatically computes overdue fees from previous week)
+
+
+need a way to store data about price updates. This should also affect new automatic ledger entries
+Main idea is to have a current list of settings, but then also keep track of all the changes made.
+Should this also be per client?
+
+Main workflows:
+    A. List all weeks in a client's ledger page
+        1. Program opens
+        2. choose the client with "load"
+        3. run "list" command
+        4. Program lists all weeks in this client's ledger page
+    B. List all entries in a certain LedgerWeek for a certain client
+        1. Program opens
+        2. choose the client with "load"
+        3. run command "query weedIdx"
+        4. Program displays all the entries from the week at weekIdx in a list form, then also gives other data
+            such as total balance
+    C. Get a client's current balance
+        1. Program opens
+        2. choose the client with "load"
+        3. run command "balance"
+        4. Program displays the total balance across all weeks,
+            positive if they've paid extra, negative if they are due
+    D. Register a due from a recent session
+        1. Program opens
+        2. choose the client with "load"
+        3. run a command to automatically generate a LedgerEntry based on some data from the session
+            such as duration, date, distance travelled, etc. If I don't give it a date, it defaults to today's date.
+        4. LedgerEntry is automatically stored in the correct week in the Ledger
+    E. Register a payment from the client
+        1. Program opens
+        2. choose the client with "load"
+        3. run a command, giving it some info about the payment. If I don't give it a date, it will use today's
+            automatically.
+        4. Program puts the entry in the correct week in the ledger.
+    F. List all current clients
+        1. program opens
+        2. run command "list"
+        3. program displays all clients in the ledger
+        or
+        1. program opens
+        2. choose client with "load"
+        3. run command "list -c"
+        4. program displays all clients in the ledger
+    G. Start a new client's page
+        1. program opens
+        2. run "load -a newClientName"
+        3. program creates new ledger page for the client and swaps to it
+        or
+        1. program opens
+        2. run "load newClientName"
+        3. program says that this client doesn't exist, and asks if I want to create on
+        4. If I say yes, program creates the new client
+
+
+Ledgers are stored like so:
+
+Each line is a new entry, unless marked by the week signature. here's an example:
+
+
+w9/10/2023
+e9/12/2023,-25,1 hour session,9/12/2023
+w9/17/2023
+e9/18/2023,-25,1 hour session,9/18/2023
+e9/20/2023,50,payment for 9/12/2023 and 9/18/2023,9/21/2023

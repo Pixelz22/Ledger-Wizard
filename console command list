@@ -1,0 +1,6 @@
+quit:
+    Exits the wizard
+    Flags:
+        NONE
+
+
